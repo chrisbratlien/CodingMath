@@ -77,24 +77,40 @@ window.onload = function() {
 			[90,-10],
 			[30,40]
 		];
+		poly = [
+			[0,0],
+			[50,0],
+			[50,50],
+			[0,50]
+		];
 		shear = [[1,1],[0,1]]
 		rotation = [[0,-1],[1,0]];
 
 
-		context.strokeStyle = 'rgba(0, 127, 255,0.2)';
+		context.strokeStyle = 'rgba(0, 127, 255,1)';
 		context.beginPath();
 		polyPlot(poly);
 		context.stroke();
 
 
-		context.strokeStyle = 'rgba(255, 127, 127,0.6)';
+		context.strokeStyle = 'rgba(255, 127, 127,0.5)';
 		context.beginPath();
 		polyPlot(poly.map(v => mmult(rotation,v2m(v)).flat()));
 		context.stroke();
 
-		context.strokeStyle = 'rgba(0, 255, 127,1)';
+		return false;
+
+		//shear then rotate
+		context.strokeStyle = 'rgba(0, 255, 127,0.5)';
 		context.beginPath();
 		T = mmult(shear,rotation);
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
+		context.stroke();
+
+		//rotate then shear
+		context.strokeStyle = 'rgba(63, 127, 255,0.5)';
+		context.beginPath();
+		T = mmult(rotation,shear);
 		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 
