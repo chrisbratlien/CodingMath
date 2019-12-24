@@ -6,6 +6,50 @@ vlerp = (a,b,factor) => vadd(a,vscale(vdiff(b,a),factor))
 vdot = (a,b) => a.reduce((accum,asubi,i) => accum + asubi * b[i],0)
 
 /**
+[[2,5,6],
+  [1,3,4]]
+=> 
+[[2,1],
+[5,3],
+[6,4]]
+
+mr = [2,5,6]
+  c = 2, ri=0, cj=0
+  c = 5, ri=0, cj=1
+  c = 6, ri=0, cj=2
+mr = [1,3,4]
+  c = 1, ri=1, cj=0
+  c = 3, ri=1, cj=1
+  c = 4, ri=1, cj=2
+**/
+
+transpose = (m) => {
+  //let res = new Array(m[0].length);
+  let res = [];
+  for (var i = 0; i < m[0].length; i += 1) {
+  	res.push([]);
+  }
+  m.forEach( (mr,ri) =>{
+  	mr.forEach( (cv,cj) => {
+  	  res[cj][ri] = cv;
+  	})
+  })
+  return res;
+}
+
+mmult = (B,A) => {
+  let res = [];
+  let AT = transpose(A);
+  return B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
+}
+
+v2m = (v) => v.map(vv => [vv]);
+
+rotation = [[0,-1],[1,0]];
+
+//mmult(rotation,v2m([1,2])).flat())
+
+/**
 vdiff([0,0],[4,8])
 (2) [4, 8]
 vscale([0,1,2],2)
