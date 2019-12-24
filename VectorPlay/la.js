@@ -37,10 +37,15 @@ transpose = (m) => {
   return res;
 }
 
-mmult = (B,A) => {
+mmult = (A,B) => {
   let res = [];
+  /**
   let AT = transpose(A);
   return B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
+  **/
+  let BT = transpose(B);
+  return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));
+
 }
 
 v2m = (v) => v.map(vv => [vv]);
