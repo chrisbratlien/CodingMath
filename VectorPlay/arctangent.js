@@ -26,6 +26,7 @@ window.onload = function() {
 		a = 0;
 
 
+
 	setup();
 	render();
 
@@ -52,30 +53,10 @@ window.onload = function() {
 
 
 		mouseVec = [0,0];
-
+		vNew = [0,0];
 
 		context.strokeStyle = 'rgba(0, 0, 0,0.2)';
 		console.log(leftCenter,rightCenter);
-		///X axis
-		context.beginPath();
-		context.moveTo(...[0-width/2,0]);
-		context.lineTo(...[width/2,0]);
-		context.stroke();
-
-		///Y axis
-		context.beginPath();
-		context.moveTo(...centerBottom);
-		context.lineTo(...centerTop);
-		context.stroke();
-
-		return false;
-		context.moveTo(20, 0);
-		context.lineTo(10, -10);
-		context.moveTo(20, 0);
-		context.lineTo(10, 10);
-		context.stroke();		
-
-
 	}
 
 	function axes() {
@@ -83,9 +64,6 @@ window.onload = function() {
 		//test plot
 		context.strokeStyle = 'rgba(255, 127, 0,0.5)';
 		context.beginPath();
-		context.moveTo(0,0);
-		context.lineTo(-200, -200);
-
 		//x
 		context.moveTo(0-width/2,0);
 		context.lineTo(width/2,0);
@@ -95,56 +73,63 @@ window.onload = function() {
 		context.lineTo(0,height/2);
 
 		context.stroke();
-
-
 	}
 
+
+	function vPlot(vOrigin,v) {
+		context.moveTo(...vOrigin);
+		context.lineTo(...v);
+	}
+
+	function testPlot() {
+		context.strokeStyle = 'rgba(255, 0, 0,0.5)';
+		context.beginPath();
+
+		vPlot([0,0],[-200,-200]);
+		vPlot([0,0],[-200, 200]);
+		vPlot([0,0],[200, -200]);
+		vPlot([0,0],[200, 200]);
+		context.stroke();
+	}
+
+
 	function render() {
-		//arrowX = width / 2 + Math.cos(a) * height * .4;
-		//arrowY = height / 2 + Math.sin(a) * height * .4;
-
-		//context.clearRect(0, 0, width, height);
-		//context.clearRect(...leftTop,width,height);
-
-		//context.clearRect(-1 * width,height/2,width,height);
-		context.clearRect(0-width/2,0-height/2,width,height);
+		
+		//context.clearRect(0-width/2,0-height/2,width,height);
 
 		context.save();
 
 		axes();
-
-		//test plot
-		context.strokeStyle = 'rgba(255, 0, 0,0.5)';
-		context.beginPath();
-		context.moveTo(0,0);//width, height);
-		context.lineTo(-200, -200);
-		context.stroke();
-
-
-
-
-
+		testPlot();
 
 		context.strokeStyle = 'rgba(0, 0, 0,0.2)';
 		context.beginPath();
-		//context.moveTo(...center);
-		context.moveTo(0,0);
-		context.lineTo(...mouseVec);
+
+
+		//vPlot([0,0],mouseVec);
+		//vPlot(mouseVec,[-1*width/2,height/2]);
+		vPlot(vNew,mouseVec);
+		vNew = [...mouseVec];
+
+
+
 		context.stroke();
-		/*
-		context.beginPath();
-		context.moveTo(20, 0);
-		context.lineTo(-20, 0);
-		context.moveTo(20, 0);
-		context.lineTo(10, -10);
-		context.moveTo(20, 0);
-		context.lineTo(10, 10);
-		context.stroke();
-		**/
+
 		context.restore();
 		requestAnimationFrame(render);
 	}
-
+	document.body.addEventListener("mouseup", function(event) {
+		//eventVec = [event.clientX, event.clientY];
+		mouseVec = [event.clientX - width/2, height/2 - event.clientY];
+		//mouseVec = eventVec;
+		//mouseVec = vsub(eventVec,vcenter);
+		//mouseVec = vscale(mouseVec,-1);
+		//mouseVec = [mouseVec[0],-1 * mouseVec[1]];
+		console.log('CLICK',mouseVec);
+		//dx = event.clientX - arrowX;
+		//dy = event.clientY - arrowY;
+		//angle = Math.atan2(dy, dx);
+	});
 	document.body.addEventListener("mousemove", function(event) {
 		eventVec = [event.clientX, event.clientY];
 		mouseVec = [event.clientX - width/2, height/2 - event.clientY]
@@ -152,7 +137,7 @@ window.onload = function() {
 		//mouseVec = vsub(eventVec,vcenter);
 		//mouseVec = vscale(mouseVec,-1);
 		//mouseVec = [mouseVec[0],-1 * mouseVec[1]];
-		console.log('eV',eventVec,'mV',mouseVec);
+		///console.log('eV',eventVec,'mV',mouseVec);
 		//dx = event.clientX - arrowX;
 		//dy = event.clientY - arrowY;
 		//angle = Math.atan2(dy, dx);
