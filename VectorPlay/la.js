@@ -45,7 +45,6 @@ mmult = (B,A) => {
 
 v2m = (v) => v.map(vv => [vv]);
 
-rotation = [[0,-1],[1,0]];
 
 //mmult(rotation,v2m([1,2])).flat())
 
