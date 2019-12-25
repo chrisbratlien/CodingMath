@@ -37,6 +37,18 @@ function rotateT(theta) {
 		[Math.sin(theta), Math.cos(theta)]
 	];
 }
+function scalarScaleT(factor) {
+	return [
+		[factor,0],
+		[0,factor]
+	];
+}
+function scaleT(vFactor) {
+	return [
+		[vFactor[0],0],
+		[0,vFactor[1]]
+	];
+}
 
 window.onload = function() {
 		canvas = document.getElementById("canvas"),
@@ -113,7 +125,11 @@ window.onload = function() {
 		context.beginPath();
 		var theta = Math.PI/2;
 		theta = 35 * Math.PI / 180;
-		polyPlot(poly.map(v => mmult(v2m(v),rotateT(theta)).flat()));
+		//polyPlot(poly.map(v => mmult(v2m(v),rotateT(theta)).flat()));
+
+		T = mmult(scaleT([0.2,2.5]),rotateT(theta));
+		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+
 		context.stroke();
 
 		return false;
