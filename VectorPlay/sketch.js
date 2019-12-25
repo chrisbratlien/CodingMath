@@ -55,6 +55,19 @@ function scaleT(vFactor) {
 	];
 }
 
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+function getRandomColor() {
+	var rgb = [64,64,64].map(max => getRandomInt(max) + 192);
+	var a = Math.random() * (1 - 0.7) + 0.7;
+	a = Math.round(a*100) / 100;
+	var result = `rgba(${rgb.join(',')},${a})`;
+	console.log(result);
+	return result;
+}
+
 window.onload = function() {
 		canvas = document.getElementById("canvas"),
 		context = canvas.getContext("2d"),
@@ -117,19 +130,19 @@ window.onload = function() {
 		];
 
 
-		context.strokeStyle = 'rgba(0, 127, 255,1)';
+		context.strokeStyle = getRandomColor();
 		context.beginPath();
 		plotPolyMatrix(poly);
 		context.stroke();
 
 
-		context.strokeStyle = 'rgba(0, 255, 255,1)';
-		context.lineWidth = 2;
+		context.strokeStyle = getRandomColor();
+		context.lineWidth = 1;
 		context.beginPath();
 		plotPolyMatrix(
 				mmult(
 					poly,
-					rotateT(Math.PI/3),
+					rotateT(Math.random() * 2 * Math.PI),
 					scaleT([2,2])
 				)
 		);
