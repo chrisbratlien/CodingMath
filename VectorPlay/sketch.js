@@ -96,7 +96,7 @@ window.onload = function() {
 		//shear
 		context.strokeStyle = 'rgba(255, 127, 127,0.5)';
 		context.beginPath();
-		polyPlot(poly.map(v => mmult(shear,v2m(v)).flat()));
+		polyPlot(poly.map(v => mmult(v2m(v),shear).flat()));
 		context.stroke();
 
 		return false;
@@ -104,7 +104,7 @@ window.onload = function() {
 		//rotate
 		context.strokeStyle = 'rgba(255, 127, 127,0.5)';
 		context.beginPath();
-		polyPlot(poly.map(v => mmult(rotation,v2m(v)).flat()));
+		polyPlot(poly.map(v => mmult(v2m(v),rotation).flat()));
 		context.stroke();
 
 		return false;
@@ -112,18 +112,39 @@ window.onload = function() {
 		//shear then rotate
 		context.strokeStyle = 'rgba(0, 255, 127,0.5)';
 		context.beginPath();
-		T = mmult(rotation,shear);//,rotation);
-		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
+		T = mmult(shear,rotation);//,rotation);
+		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
 		context.stroke();
 
-		return false;
 
 		//rotate then shear
-		context.strokeStyle = 'rgba(63, 127, 255,0.5)';
+		context.strokeStyle = 'rgba(0, 127, 255,0.5)';
 		context.beginPath();
 		T = mmult(rotation,shear);
-		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
+		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
 		context.stroke();
+
+		//rotate then shear
+		context.strokeStyle = 'pink';
+		context.beginPath();
+		T = mmult(shear,rotation,shear);
+		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		context.stroke();
+
+		context.strokeStyle = 'yellow';
+		context.beginPath();
+		T = mmult(shear,rotation,shear,rotation);
+		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		context.stroke();
+
+		context.strokeStyle = 'black';
+		context.beginPath();
+		T = mmult(shear,rotation,shear,rotation,shear);
+		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		context.stroke();
+
+
+
 
 
 

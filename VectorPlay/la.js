@@ -37,16 +37,23 @@ transpose = (m) => {
   return res;
 }
 
-mmult = (A,B) => {
-  let res = [];
-  /**
+mmultAB = (A,B) => {
   let AT = transpose(A);
   return B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
-  **/
+  /**
   let BT = transpose(B);
   return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));
-
+  **/
 }
+
+//Ts as separate args
+mmult = (...Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
+
+
+/*
+// Ts must be array
+mmult = (Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
+*/
 
 v2m = (v) => v.map(vv => [vv]);
 
