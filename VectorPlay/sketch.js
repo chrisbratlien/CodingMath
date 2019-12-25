@@ -22,13 +22,17 @@ function vPlot(vOrigin,v) {
 	context.moveTo(...vOrigin);
 	context.lineTo(...v);
 }
-function polyPlot(poly) {
-	poly.forEach((v,i) => {
+
+function plotPolyVecs(polyVecs) {
+	polyVecs.forEach((v,i) => {
 		if (i > 0) {
-			vPlot(poly[i-1],v)
+			vPlot(polyVecs[i-1],v)
 		}
 	})
-	vPlot(poly[poly.length-1],poly[0]);
+	vPlot(polyVecs[polyVecs.length-1],polyVecs[0]);
+}
+function plotPolyMatrix(m) {
+	plotPolyVecs(transpose(m));
 }
 
 function rotateT(theta) {
@@ -96,20 +100,41 @@ window.onload = function() {
 			[90,-10],
 			[30,40]
 		];
-		poly = [
+		poly = transpose([
 			[0,0],
 			[50,0],
 			[50,50],
 			[0,50]
+		]);
+		shear = [
+			[1,1],
+			[0,1]
+		]
+		rotation = [
+		  [0,-1],
+		  [1, 0]
 		];
-		shear = [[1,1],[0,1]]
-		rotation = [[0,-1],[1,0]];
 
 
 		context.strokeStyle = 'rgba(0, 127, 255,1)';
 		context.beginPath();
-		polyPlot(poly);
+		plotPolyMatrix(poly);
 		context.stroke();
+
+
+		context.strokeStyle = 'rgba(0, 255, 255,1)';
+		context.lineWidth = 2;
+		context.beginPath();
+		plotPolyMatrix(
+				mmult(
+					poly,
+					rotateT(Math.PI/3),
+					scaleT([2,2])
+				)
+		);
+		context.stroke();
+
+		return false;
 
 		/**
 		//shear
@@ -173,6 +198,7 @@ window.onload = function() {
 
 
 
+
 	}
 
 
@@ -210,10 +236,10 @@ window.onload = function() {
 
 
 	function render() {
-		
+		return false;
 		//context.clearRect(0-width/2,0-height/2,width,height);
 
-		context.save();
+		//context.save();
 
 	
 		context.strokeStyle = 'rgba(0, 0, 0,0.2)';
