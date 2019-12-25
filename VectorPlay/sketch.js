@@ -15,7 +15,8 @@ var canvas,
 	vSave,
 	vSeg,
 	vNew,
-	poly;
+	poly,
+	paused = false;
 
 
 function vPlot(vOrigin,v) {
@@ -70,7 +71,7 @@ window.onload = function() {
 
 
 	setup();
-	render();
+	//render();
 
 	function setup() {
 		context.transform(1,0,0,-1,width/2,height/2);
@@ -234,61 +235,46 @@ window.onload = function() {
 		context.stroke();
 	}
 
+	render = function() {
+		a = .01;
+		poly = mmult(
+			poly,
+			rotateT(a)					
+		);
+		
+		context.clearRect(0-width/2,0-height/2,width,height);
 
-	function render() {
+		context.save();
+
+		context.beginPath();
+		plotPolyMatrix(poly);
+		context.stroke();
+
+		context.restore();
+
+		if (!paused) {
+			requestAnimationFrame(render);
+		}
 		return false;
-		//context.clearRect(0-width/2,0-height/2,width,height);
-
-		//context.save();
-
 	
 		context.strokeStyle = 'rgba(0, 0, 0,0.2)';
 		context.beginPath();
-
-
-		//vPlot([0,0],mouseVec);
-		//vPlot(mouseVec,[-1*width/2,height/2]);
-		//vNew = [...mouseVec];
-
-		//vPlot(vNew,mouseVec);
-		//vNew = vlerp(vNew,mouseVec,0.1);
-
 		vSave = [...vSeg];
 		vSeg = vlerp(vSeg,vGoal,0.5);
-
 		vPlot(vSave,vSeg);
-
-
 		context.stroke();
-
 		context.restore();
 		requestAnimationFrame(render);
 	}
 	document.body.addEventListener("mouseup", function(event) {
 		//eventVec = [event.clientX, event.clientY];
 		vMouse = [event.clientX - width/2, height/2 - event.clientY];
-		//goalVec = [event.clientX - width/2, height/2 - event.clientY];
 		vGoal = [...vMouse];
-		//mouseVec = eventVec;
-		//mouseVec = vsub(eventVec,vcenter);
-		//mouseVec = vscale(mouseVec,-1);
-		//mouseVec = [mouseVec[0],-1 * mouseVec[1]];
 		console.log('CLICK',vMouse,vGoal);
-		//dx = event.clientX - arrowX;
-		//dy = event.clientY - arrowY;
-		//angle = Math.atan2(dy, dx);
 	});
 	document.body.addEventListener("mousemove", function(event) {
 		eventVec = [event.clientX, event.clientY];
-		vMouse = [event.clientX - width/2, height/2 - event.clientY]
-		//mouseVec = eventVec;
-		//mouseVec = vsub(eventVec,vcenter);
-		//mouseVec = vscale(mouseVec,-1);
-		//mouseVec = [mouseVec[0],-1 * mouseVec[1]];
-		///console.log('eV',eventVec,'mV',mouseVec);
-		//dx = event.clientX - arrowX;
-		//dy = event.clientY - arrowY;
-		//angle = Math.atan2(dy, dx);
+		vMouse = [event.clientX - width/2, height/2 - event.clientY];
 	});
 
 
