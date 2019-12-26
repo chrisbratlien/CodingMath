@@ -16,12 +16,25 @@ var canvas,
 	vSeg,
 	vNew,
 	poly,
-	paused = false;
+	paused,
+	setup,
+	render,
+	v345,
+	m345;
 
 
 function vPlot(vOrigin,v) {
+	context.strokeStyle = getRandomColor();
+	context.beginPath();
 	context.moveTo(...vOrigin);
 	context.lineTo(...v);
+	context.stroke();
+}
+
+function plotVecs(ovPairs) {
+	ovPairs.forEach((pair,i) => {
+		vPlot(pair[0],pair[1])
+	});
 }
 
 function plotPolyVecs(polyVecs) {
@@ -32,8 +45,16 @@ function plotPolyVecs(polyVecs) {
 	})
 	vPlot(polyVecs[polyVecs.length-1],polyVecs[0]);
 }
+
 function plotPolyMatrix(m) {
 	plotPolyVecs(transpose(m));
+}
+
+function rotateMemo(theta) {
+	let cos = Math.cos(theta),
+	sin = Math.sin(theta),
+	negSin = -1 * sin
+	return [cos,sin,negSin];
 }
 
 function rotateT(theta) {
@@ -42,6 +63,44 @@ function rotateT(theta) {
 		[Math.sin(theta), Math.cos(theta)]
 	];
 }
+
+function rotateZT(theta) { //around Z axis
+	let [cos,sin,negSin] = rotateMemo(theta);
+	return [
+		[cos, negSin, 0],
+		[sin,    cos, 0],
+		[  0,      0, 1]
+	];
+}
+function rotateXT(theta) { // around X axis
+	let [cos,sin,negSin] = rotateMemo(theta);
+	return [
+		[1,   0,      0],
+		[0, cos, negSin],
+		[0, sin,    cos]
+	];
+}
+function rotateYT(theta) { // around Y axis
+	let [cos,sin,negSin] = rotateMemo(theta);
+	return [
+		[   cos, 0, sin],
+		[     0, 1,   0],
+		[negSin, 0, cos]
+	];
+}
+
+
+project3Dto2D = [
+		[1,0,0],
+		[0,1,0]
+];
+
+wasproject3Dto2D =[
+		[1,0],
+		[0,1],
+		[0,0]
+	];
+
 function scalarScaleT(factor) {
 	return [
 		[factor,0],
@@ -60,13 +119,39 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 function getRandomColor() {
-	var rgb = [64,64,64].map(max => getRandomInt(max) + 192);
-	var a = Math.random() * (1 - 0.7) + 0.7;
+	var rgb = [192,192,192].map(max => getRandomInt(max) + 63);
+	var a = Math.random() * (1 - 0.9) + 0.9;
 	a = Math.round(a*100) / 100;
 	var result = `rgba(${rgb.join(',')},${a})`;
-	console.log(result);
+	///console.log(result);
 	return result;
 }
+
+function plotBasisVector(vecs,style) {
+	context.lineWidth = 2;
+	context.strokeStyle = style;
+	context.beginPath();
+	plotVecs(vecs);
+	context.stroke();
+}
+
+
+function plotiHat() {
+	plotBasisVector([
+		[[0,0],[30,0]],
+		[[23,5],[30,0]],
+		[[23,-5],[30,0]],
+	],'rgba(63,255,0,1)');
+}
+
+function plotjHat() {
+	plotBasisVector([
+		[[0,0],[0,30]],
+		[[5,23],[0,30]],
+		[[-5,23],[0,30]],
+	],'rgba(192,31,31,1)');
+}
+
 
 window.onload = function() {
 		canvas = document.getElementById("canvas"),
@@ -81,14 +166,12 @@ window.onload = function() {
 		angle = 0,
 		a = 0;
 
+	//orientation
+	context.transform(1,0,0,-1,width/2,height/2);
+	context.strokeStyle = 'rgba(255, 0, 0,0.5)';
 
 
-	setup();
-	//render();
-
-	function setup() {
-		context.transform(1,0,0,-1,width/2,height/2);
-		context.strokeStyle = 'rgba(255, 0, 0,0.5)';
+	setup = function() {
 
 		leftCenter = vsub(center,[width/2,0]);
 		leftTop = vadd(center,[0,height/2]);
@@ -107,7 +190,7 @@ window.onload = function() {
 		context.strokeStyle = 'rgba(0, 0, 0,0.2)';
 		console.log(leftCenter,rightCenter);
 
-		axes();
+		plotAxes();
 		//testPlot();
 		poly = [
 			[10,20],
@@ -130,6 +213,15 @@ window.onload = function() {
 		];
 
 
+		linaz = transpose([
+			[130,80,0],
+			[-20,90,0],
+			[30,60,0]
+		]);
+
+		v345 = [[3,4,5]];
+		m345 = transpose(v345);
+
 		context.strokeStyle = getRandomColor();
 		context.beginPath();
 		plotPolyMatrix(poly);
@@ -146,6 +238,12 @@ window.onload = function() {
 					scaleT([2,2])
 				)
 		);
+		context.stroke();
+
+
+		context.strokeStyle = getRandomColor();
+		context.beginPath();
+		plotPolyMatrix(linaz);
 		context.stroke();
 
 		return false;
@@ -206,22 +304,21 @@ window.onload = function() {
 		T = mmult(shear,rotation,shear,rotation,shear);
 		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
 		context.stroke();
-
-
-
-
-
-
-
 	}
 
 
 
+	setup();
+	plotiHat();
+	plotjHat();
+	//render();
 
-	function axes() {
+
+
+	function plotAxes() {
 
 		//test plot
-		context.strokeStyle = 'rgba(255, 127, 0,0.5)';
+		context.strokeStyle = getRandomColor();
 		context.beginPath();
 		//x
 		context.moveTo(0-width/2,0);
@@ -238,7 +335,7 @@ window.onload = function() {
 
 
 	function testPlot() {
-		context.strokeStyle = 'rgba(255, 0, 0,0.5)';
+		context.strokeStyle = getRandomColor();
 		context.beginPath();
 
 		vPlot([0,0],[-200,-200]);
@@ -254,6 +351,15 @@ window.onload = function() {
 			poly,
 			rotateT(a)					
 		);
+
+
+		linaz = mmult(
+			linaz,
+			rotateZTa(a/2)					
+		);
+
+
+
 		
 		context.clearRect(0-width/2,0-height/2,width,height);
 
@@ -261,6 +367,7 @@ window.onload = function() {
 
 		context.beginPath();
 		plotPolyMatrix(poly);
+		plotPolyMatrix(linaz);
 		context.stroke();
 
 		context.restore();
