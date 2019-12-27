@@ -16,6 +16,7 @@ var canvas,
 	vSeg,
 	vNew,
 	poly,
+	poly3D,
 	paused,
 	setup,
 	render,
@@ -192,7 +193,8 @@ window.onload = function() {
 
 		plotAxes();
 		//testPlot();
-		poly = [
+
+		wasPoly = [
 			[10,20],
 			[90,-10],
 			[30,40]
@@ -202,6 +204,12 @@ window.onload = function() {
 			[50,0],
 			[50,50],
 			[0,50]
+		]);
+		poly3D = transpose([
+			[0,0,0],
+			[50,0,0],
+			[50,50,0],
+			[0,50,0]
 		]);
 		shear = [
 			[1,1],
@@ -222,6 +230,13 @@ window.onload = function() {
 		v345 = [[3,4,5]];
 		m345 = transpose(v345);
 
+		v012345 = [
+			[0,10,20],
+			[30,40,50]
+		];
+		m012345 = transpose(v012345);
+
+
 		context.strokeStyle = getRandomColor();
 		context.beginPath();
 		plotPolyMatrix(poly);
@@ -238,13 +253,16 @@ window.onload = function() {
 					scaleT([2,2])
 				)
 		);
-		context.stroke();
+		//context.stroke();
 
 
 		context.strokeStyle = getRandomColor();
-		context.beginPath();
+		//context.beginPath();
 		plotPolyMatrix(linaz);
-		context.stroke();
+
+
+		//plotPolyMatrix(mmult(m012345,rotateZT(Math.PI/2),project3Dto2D))
+		//context.stroke();
 
 		return false;
 
@@ -355,8 +373,20 @@ window.onload = function() {
 
 		linaz = mmult(
 			linaz,
-			rotateZTa(a/2)					
+			//rotateZT(a),					
+			rotateYT(2*a),
+			rotateXT(a)		
 		);
+
+
+		poly3D = mmult(
+			poly3D,
+			//rotateZT(a),					
+			rotateYT(2*a),
+			rotateXT(a)		
+		);
+
+
 
 
 
@@ -367,7 +397,8 @@ window.onload = function() {
 
 		context.beginPath();
 		plotPolyMatrix(poly);
-		plotPolyMatrix(linaz);
+		plotPolyMatrix(mmult(linaz,project3Dto2D));
+		plotPolyMatrix(mmult(poly3D,project3Dto2D));
 		context.stroke();
 
 		context.restore();
