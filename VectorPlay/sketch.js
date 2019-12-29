@@ -51,38 +51,67 @@ function plotPolyMatrix(m) {
 	plotPolyVecs(transpose(m));
 }
 
-function rotateMemo(theta) {
-	let cos = Math.cos(theta),
-	sin = Math.sin(theta),
-	negSin = -1 * sin
-	return [cos,sin,negSin];
-}
+Tr = {
+	rotateMemo: function(theta) {
+		let cos = Math.cos(theta),
+		sin = Math.sin(theta),
+		negSin = -1 * sin
+		return [cos,sin,negSin];
+	},
+	xy: {},
+	xyw: {},
+	xyz: {},
+	xyzw: {}
+};
 
-function rotateT(theta) {
+Tr.xy.rotate = function(theta) {
+	let [cos,sin,negSin] = Tr.rotateMemo(theta);
 	return [
-		[Math.cos(theta), -1 * Math.sin(theta)],
-		[Math.sin(theta), Math.cos(theta)]
+		[cos, negSin],
+		[sin,    cos]
 	];
 }
 
-function rotateZT(theta) { //around Z axis
-	let [cos,sin,negSin] = rotateMemo(theta);
+Tr.xyw.rotate = function(theta) {
+	let [cos,sin,negSin] = Tr.rotateMemo(theta);
 	return [
 		[cos, negSin, 0],
 		[sin,    cos, 0],
 		[  0,      0, 1]
 	];
 }
-function rotateXT(theta) { // around X axis
-	let [cos,sin,negSin] = rotateMemo(theta);
+
+
+Tr.xyzw.translateXYZ = function(v) {
+	return [
+		[1, 0, 0, v[0]],
+		[0, 1, 0, v[1]],
+		[0, 0, 1, v[2]],
+		[0, 0, 0,    1]
+	];
+}
+
+
+Tr.xyz.rotateZ = function(theta) { //around Z axis
+	let [cos,sin,negSin] = Tr.rotateMemo(theta);
+	return [
+		[cos, negSin, 0],
+		[sin,    cos, 0],
+		[  0,      0, 1]
+	];
+}
+
+Tr.xyz.rotateX = function(theta) { // around X axis
+	let [cos,sin,negSin] = Tr.rotateMemo(theta);
 	return [
 		[1,   0,      0],
 		[0, cos, negSin],
 		[0, sin,    cos]
 	];
 }
-function rotateYT(theta) { // around Y axis
-	let [cos,sin,negSin] = rotateMemo(theta);
+
+Tr.xyz.rotateY = function(theta) { // around Y axis
+	let [cos,sin,negSin] = Tr.rotateMemo(theta);
 	return [
 		[   cos, 0, sin],
 		[     0, 1,   0],
@@ -91,16 +120,72 @@ function rotateYT(theta) { // around Y axis
 }
 
 
-project3Dto2D = [
-		[1,0,0],
-		[0,1,0]
+Tr.xyz.toXY = [
+		[1, 0, 0],
+		[0, 1, 0]
 ];
 
-wasproject3Dto2D =[
-		[1,0],
-		[0,1],
-		[0,0]
+
+
+Tr.toW = function (v) {
+	var result = v.map( (row,ri) => {
+		return [...row, 0];
+	});
+	var last = result[result.length-1];
+	result.push(last.map( (el,i) => i == last.length-1 ? 1 : 0));
+	return result;
+}
+
+Tr.xyzw.rotateZ = function(theta) { //around Z axis
+	let [cos,sin,negSin] = Tr.rotateMemo(theta);
+	return [
+		[cos, negSin, 0, 0],
+		[sin,    cos, 0, 0],
+		[  0,      0, 1, 0],
+		[  0,      0, 0, 1]
 	];
+}
+
+Tr.xyzw.rotateX = function(theta) { // around X axis
+	let [cos,sin,negSin] = Tr.rotateMemo(theta);
+	return [
+		[1,   0,      0, 0],
+		[0, cos, negSin, 0],
+		[0, sin,    cos, 0],
+		[0,   0,      0, 1]
+	];
+}
+
+Tr.xyzw.rotateY = function(theta) { // around Y axis
+	let [cos,sin,negSin] = Tr.rotateMemo(theta);
+	return [
+		[   cos, 0, sin, 0],
+		[     0, 1,   0, 0],
+		[negSin, 0, cos, 0],
+		[     0, 0,   0, 1]
+	];
+}
+
+Tr.xyzw.translateXYZ = function(v) {
+	return [
+		[1, 0, 0, v[0]],
+		[0, 1, 0, v[1]],
+		[0, 0, 1, v[2]],
+		[0, 0, 0,    1]
+	];
+}
+
+Tr.xyzw.toXY = [
+		[1, 0, 0, 0],
+		[0, 1, 0, 0]
+];
+
+Tr.xyzw.toXYZ = [
+		[1, 0, 0, 0],
+		[0, 1, 0, 0],
+		[0, 0, 1, 0]
+];
+
 
 function scalarScaleT(factor) {
 	return [
@@ -153,6 +238,9 @@ function plotjHat() {
 	],'rgba(192,31,31,1)');
 }
 
+function polyMatrixToW(m) {
+	return transpose(transpose(m).map(r => [...r,1]));
+}
 
 window.onload = function() {
 		canvas = document.getElementById("canvas"),
@@ -249,7 +337,7 @@ window.onload = function() {
 		plotPolyMatrix(
 				mmult(
 					poly,
-					rotateT(Math.random() * 2 * Math.PI),
+					Tr.xy.rotate(Math.random() * 2 * Math.PI),
 					scaleT([2,2])
 				)
 		);
@@ -260,9 +348,16 @@ window.onload = function() {
 		//context.beginPath();
 		plotPolyMatrix(linaz);
 
-
-		//plotPolyMatrix(mmult(m012345,rotateZT(Math.PI/2),project3Dto2D))
+		/***
+		//plotPolyMatrix(
+			mmult(
+				m012345,
+					Tr.xyz.rotateZ(Math.PI/2),
+					Tr.xyz.toXY
+			)
+		)
 		//context.stroke();
+		***/
 
 		return false;
 
@@ -280,9 +375,9 @@ window.onload = function() {
 		context.beginPath();
 		var theta = Math.PI/2;
 		theta = 35 * Math.PI / 180;
-		//polyPlot(poly.map(v => mmult(v2m(v),rotateT(theta)).flat()));
+		//polyPlot(poly.map(v => mmult(v2m(v),Tr.xy.rotate(theta)).flat()));
 
-		T = mmult(scaleT([0.2,2.5]),rotateT(theta));
+		T = mmult(scaleT([0.2,2.5]),Tr.xy.rotate(theta));
 		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
 
 		context.stroke();
@@ -367,23 +462,23 @@ window.onload = function() {
 		a = .01;
 		poly = mmult(
 			poly,
-			rotateT(a)					
+			Tr.xy.rotate(a)					
 		);
 
 
 		linaz = mmult(
 			linaz,
-			//rotateZT(a),					
-			rotateYT(2*a),
-			rotateXT(a)		
+			//Tr.xyz.rotateZ(a),					
+			Tr.xyz.rotateY(2*a),
+			Tr.xyz.rotateX(a)		
 		);
 
 
 		poly3D = mmult(
 			poly3D,
-			//rotateZT(a),					
-			rotateYT(2*a),
-			rotateXT(a)		
+			//Tr.xyz.rotateZ(a),					
+			Tr.xyz.rotateY(2*a),
+			Tr.xyz.rotateX(a)		
 		);
 
 
@@ -397,10 +492,16 @@ window.onload = function() {
 
 		context.beginPath();
 		plotPolyMatrix(poly);
-		plotPolyMatrix(mmult(linaz,project3Dto2D));
-		plotPolyMatrix(mmult(poly3D,project3Dto2D));
+		plotPolyMatrix(
+			mmult(
+				transpose(transpose(linaz).map(r => [...r,1])),
+				Tr.xyzw.translateXYZ([0,-1,0]),
+				Tr.xyzw.toXY));
+		plotPolyMatrix(
+			mmult(
+				poly3D,
+				Tr.xyz.toXY));
 		context.stroke();
-
 		context.restore();
 
 		if (!paused) {
