@@ -1,3 +1,4 @@
+debug = false;
 vscale = (v,factor) => v.map(n => n * factor)
 vadd = (a,b) => a.map((asubi,i) => asubi + b[i]) // a-> + b-> 
 vdiff = (a,b) => vadd(a,vscale(b,-1));
@@ -45,9 +46,28 @@ mmultAB = (A,B) => {
   return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));
   **/
 }
-
 //Ts as separate args
 mmult = (...Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
+
+mmultAB2 = (A,B) => {
+  if (debug) { 
+    debug = true;
+  }
+  let AT = transpose(A);
+  let result = B.map( function(Br,Bri) { 
+    var r = AT.map( function(ATr,ATri) { 
+      return vdot(ATr,Br); 
+    });
+    return r;
+  });
+  return result;
+  /**
+  let BT = transpose(B);
+  return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));
+  **/
+}
+
+mmult2 = (...Ts) => Ts.reduce( (accum,T) => mmultAB2(accum,T));
 
 
 /*
