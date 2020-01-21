@@ -52,6 +52,11 @@ mmult = (...Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
 mmultAB2 = (A,B) => {
   if (debug) { 
     debug = true;
+    console.log('mmultAB2::BEFORE::A');
+    console.table(A);
+    console.log('mmultAB2::BEFORE::B');
+    console.table(B);
+    debug = true;
   }
   let AT = transpose(A);
   let result = B.map( function(Br,Bri) { 
@@ -60,7 +65,23 @@ mmultAB2 = (A,B) => {
     });
     return r;
   });
+
+  if (debug) { 
+    debug = true;
+    console.log('mmultAB2::AFTER::result');
+    console.table(result);
+    debug = true;
+    /**
+    console.log('mmultAB2::BEFORE::B');
+    console.table(B);
+    **/
+  }
+
+
+
   return result;
+
+
   /**
   let BT = transpose(B);
   return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));

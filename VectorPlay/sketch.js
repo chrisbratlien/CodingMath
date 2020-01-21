@@ -179,12 +179,18 @@ Tr.xyzw.rotateZ = function(theta) { //around Z axis
 
 Tr.xyzw.rotateX = function(theta) { // around X axis
 	let [cos,sin,negSin] = Tr.rotateMemo(theta);
-	return [
+	let result = [
 		[1,   0,      0, 0],
 		[0, cos, negSin, 0],
 		[0, sin,    cos, 0],
 		[0,   0,      0, 1]
 	];
+	if (debug) {
+		console.log('Tr.xyzw.rotateX theta:',theta);
+		console.table(result);
+		debug = true;
+	}
+	return result;
 }
 
 Tr.xyzw.rotateY = function(theta) { // around Y axis
@@ -317,16 +323,16 @@ window.onload = function() {
 			[0,50]
 		]);
 		poly3D = transpose([
-			[0,0,0],
-			[50,0,0],
-			[50,50,0],
-			[0,50,0]
+			[0,0,0], //bottom left
+			[50,0,0],//bottom right
+			[50,50,0], //top right
+			[0,50,0] //top left
 		]);
 		poly3DW = transpose([
-			[0,0,0,1],
-			[50,0,0,1],
-			[50,50,0,1],
-			[0,50,0,1]
+			[0,0,0,1],//BL
+			[50,0,0,1],//BR
+			[50,50,0,1],//TR
+			[0,50,0,1] //TL
 		]);
 
 
@@ -494,7 +500,8 @@ window.onload = function() {
 
 		poly3DW = mmult2(
 			poly3DW,
-			Tr.xyzw.rotateX(-2*da)
+			Tr.xyzw.rotateX(-2*da),
+			//poly3DW
 			//Tr.xyzw.rotateY(0.2*da),
 			//Tr.xyzw.rotateZ(0.5*da),
 			//////Tr.xyzw.translateXYZ([1,-1*a,0])
@@ -502,26 +509,26 @@ window.onload = function() {
 
 
 		let poly3DWXY = [
-			poly3DW[0][1],
-			poly3DW[1][1]
+			poly3DW[0][0],
+			poly3DW[1][0]
 		];
 
-		lerped = vlerp(poly3DWXY,vGoal,0.2);
+		lerped = vlerp(poly3DWXY,vGoal,0.33);
 		lerpDiff = vdiff(lerped,poly3DWXY);
 		console.log('goal',vGoal);
 		console.log('poly',poly3DWXY);
 		console.log('lerped',lerped);
 		console.log('lerpDiff',lerpDiff);
 
-		var smoosh = [...lerpDiff,0];
-		console.log('smoosh',smoosh);
+		var lerpDiffXYZ = [...lerpDiff,0];
+		console.log('lerpDiffXYZ',lerpDiffXYZ);
 
 
 		console.log('BEFORE');
 		console.table(poly3DW);
 		poly3DW = mmult2(
 			poly3DW,
-			Tr.xyzw.translateXYZ(smoosh)
+			Tr.xyzw.translateXYZ(lerpDiffXYZ)
 		);
 		console.log('AFTER');
 		console.table(poly3DW);
@@ -551,11 +558,11 @@ window.onload = function() {
 		if (!paused) {
 			setTimeout(function(){
 				requestAnimationFrame(render);
-			},1000);
+			},1);
 		}
-		return false;
+		return false;//BAIL OUT EARLY
 	
-		context.strokeStyle = 'rgba(0, 0, 0,0.2)';
+		context.strokeStyle = 'rgba(255, 255, 0,0.2)';
 		context.beginPath();
 		vSave = [...vSeg];
 		vSeg = vlerp(vSeg,vGoal,0.5);
@@ -564,7 +571,7 @@ window.onload = function() {
 		context.restore();
 		setTimeout(function() {
 			requestAnimationFrame(render);
-		},500);
+		},5);
 	};//render
 
 
@@ -584,6 +591,7 @@ window.onload = function() {
 		vGoal = [...vMouse];
 		console.log('CLICK',vMouse,vGoal);
 		debug = true;
+		//requestAnimationFrame(render);
 	});
 	document.body.addEventListener("mousemove", function(event) {
 		eventVec = [event.clientX, event.clientY];
