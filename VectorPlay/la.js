@@ -39,7 +39,9 @@ transpose = (m) => {
 
 mmultAB = (A,B) => {
   let AT = transpose(A);
-  return B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
+  var resT = B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
+  var result = transpose(resT);
+  return result;
   /**
   let BT = transpose(B);
   return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));
