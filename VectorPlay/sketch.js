@@ -336,9 +336,9 @@ window.onload = function() {
 		context.beginPath();
 		plotPolyMatrix(
 				mmult(
-					poly,
 					Tr.xy.rotate(Math.random() * 2 * Math.PI),
-					scaleT([2,2])
+					scaleT([2,2]),
+					poly					
 				)
 		);
 		//context.stroke();
@@ -378,7 +378,7 @@ window.onload = function() {
 		//polyPlot(poly.map(v => mmult(v2m(v),Tr.xy.rotate(theta)).flat()));
 
 		T = mmult(scaleT([0.2,2.5]),Tr.xy.rotate(theta));
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 
 		context.stroke();
 
@@ -396,26 +396,26 @@ window.onload = function() {
 		context.strokeStyle = 'rgba(0, 127, 255,0.5)';
 		context.beginPath();
 		T = mmult(rotation,shear);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 
 		//rotate then shear
 		context.strokeStyle = 'pink';
 		context.beginPath();
 		T = mmult(shear,rotation,shear);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 
 		context.strokeStyle = 'yellow';
 		context.beginPath();
 		T = mmult(shear,rotation,shear,rotation);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 
 		context.strokeStyle = 'black';
 		context.beginPath();
 		T = mmult(shear,rotation,shear,rotation,shear);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 	}
 
@@ -461,30 +461,25 @@ window.onload = function() {
 	render = function() {
 		a = .01;
 		poly = mmult(
+			Tr.xy.rotate(a),
 			poly,
-			Tr.xy.rotate(a)					
 		);
 
 
 		linaz = mmult(
-			linaz,
 			//Tr.xyz.rotateZ(a),					
 			Tr.xyz.rotateY(2*a),
-			Tr.xyz.rotateX(a)		
+			Tr.xyz.rotateX(a),
+			linaz,
 		);
 
 
 		poly3D = mmult(
-			poly3D,
 			//Tr.xyz.rotateZ(a),					
 			Tr.xyz.rotateY(2*a),
-			Tr.xyz.rotateX(a)		
+			Tr.xyz.rotateX(a),
+			poly3D
 		);
-
-
-
-
-
 		
 		context.clearRect(0-width/2,0-height/2,width,height);
 
@@ -494,13 +489,14 @@ window.onload = function() {
 		plotPolyMatrix(poly);
 		plotPolyMatrix(
 			mmult(
-				transpose(transpose(linaz).map(r => [...r,1])),
 				Tr.xyzw.translateXYZ([0,-1,0]),
-				Tr.xyzw.toXY));
+				Tr.xyzw.toXY),
+				transpose(transpose(linaz).map(r => [...r,1])));
 		plotPolyMatrix(
 			mmult(
+				Tr.xyz.toXY,
 				poly3D,
-				Tr.xyz.toXY));
+			));
 		context.stroke();
 		context.restore();
 
