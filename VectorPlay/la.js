@@ -6,6 +6,7 @@ vsub = vdiff;
 vlerp = (a,b,factor) => vadd(a,vscale(vdiff(b,a),factor))
 vdot = (a,b) => a.reduce((accum,asubi,i) => accum + asubi * b[i],0)
 
+
 /**
 [[2,5,6],
   [1,3,4]]
@@ -40,7 +41,11 @@ transpose = (m) => {
 
 mmultAB = (A,B) => {
   let AT = transpose(A);
-  return B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
+  let res = B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
+  return res;
+
+  let result = transpose(resT);
+  return result;
   /**
   let BT = transpose(B);
   return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));
@@ -49,7 +54,9 @@ mmultAB = (A,B) => {
 //Ts as separate args
 mmult = (...Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
 
-mmultAB2 = (A,B) => {
+wasmmultAB2 = (A,B) => {
+
+  let result;
   if (debug) { 
     debug = true;
     console.log('mmultAB2::BEFORE::A');
@@ -58,13 +65,40 @@ mmultAB2 = (A,B) => {
     console.table(B);
     debug = true;
   }
-  let AT = transpose(A);
+
+  let rowsA = transpose(A);
+  let colsB = B;
+
+  ////let colsB = transpose(B);
+  let resultRows = rowsA.map(function(rowA,rowAI){
+    let newRow = colsB.map(function(colB,colBI){
+      return vdot(rowA,colB);
+    });
+    return newRow;
+  });
+
+  result = transpose(resultRows);
+
+  /*
+  result = colsB.map(function(colB,colBI){
+    let newRow = A.map(function(rowA,rowAI){
+      return vdot(rowA,colB);
+    });
+    return newRow;
+  });
+  **/
+
+  return result;
+  /***
+  let colsA = transpose(A);
   let result = B.map( function(Br,Bri) { 
-    var r = AT.map( function(ATr,ATri) { 
-      return vdot(ATr,Br); 
+    var r = colsA.map( function(colA,ColAi) { 
+      return vdot(colA,Br); 
     });
     return r;
   });
+  ***/
+  ///let result = transpose(resT);
 
   if (debug) { 
     debug = true;
@@ -87,6 +121,8 @@ mmultAB2 = (A,B) => {
   return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));
   **/
 }
+
+///let mmultAB = mmultAB2;
 
 mmult2 = (...Ts) => Ts.reduce( (accum,T) => mmultAB2(accum,T));
 

@@ -22,12 +22,24 @@ var canvas,
 	setup,
 	render,
 	v345,
-	m345;
+	m345,
+	yAngGoal,
+	yAngDiff,
+	yAng;
 
 	var dx, dy,
 	angle = 0,
 	da = 0;
 	a = 0;
+
+	xAng = 0;
+	xAngDiff = 0;
+	xAngGoal = 0;
+
+	yAng = 0;
+	yAngDiff = 0;
+	yAngGoal = 0;
+
 
 function vPlot(vOrigin,v) {
 	//context.strokeStyle = getRandomColor();
@@ -44,16 +56,35 @@ function plotVecs(ovPairs) {
 }
 
 function plotPolyVecs(polyVecs) {
+	let colors = [
+		'white',
+		'teal',
+		'magenta',
+		'orange',
+		'pink'
+	];
 	polyVecs.forEach((v,i) => {
 		if (i > 0) {
+			context.strokeStyle = colors[i];
+
 			vPlot(polyVecs[i-1],v)
 		}
 	})
+	context.strokeStyle = colors[colors.length-1];
 	vPlot(polyVecs[polyVecs.length-1],polyVecs[0]);
 }
 
 function plotPolyMatrix(m) {
-	plotPolyVecs(transpose(m));
+
+
+	if (debug) {
+		console.log('plotPolyMatrix m');
+		console.table(m)		
+	}
+	if (isNaN(m[0][0])) {
+		throw "NONANANA";
+	}
+	plotPolyVecs(m);
 }
 
 		shear = [
@@ -113,14 +144,6 @@ Tr.xyw.rotate = function(theta) {
 }
 
 
-Tr.xyzw.translateXYZ = function(v) {
-	return [
-		[1, 0, 0, v[0]],
-		[0, 1, 0, v[1]],
-		[0, 0, 1, v[2]],
-		[0, 0, 0,    1]
-	];
-}
 
 
 Tr.xyz.rotateZ = function(theta) { //around Z axis
@@ -188,7 +211,7 @@ Tr.xyzw.rotateX = function(theta) { // around X axis
 	if (debug) {
 		console.log('Tr.xyzw.rotateX theta:',theta);
 		console.table(result);
-		debug = true;
+		//debug = true;
 	}
 	return result;
 }
@@ -202,20 +225,28 @@ Tr.xyzw.rotateY = function(theta) { // around Y axis
 		[     0, 0,   0, 1]
 	];
 }
+Tr.xyzw.rotate = function(vTheta) {
+	return mmult(
+		Tr.xyzw.rotateX(vTheta[0]),
+		Tr.xyzw.rotateY(vTheta[1]),
+		Tr.xyzw.rotateZ(vTheta[2])
+	)
+};
 
 Tr.xyzw.translateXYZ = function(v) {
-	return [
+	return transpose([
 		[1, 0, 0, v[0]],
 		[0, 1, 0, v[1]],
 		[0, 0, 1, v[2]],
 		[0, 0, 0,    1]
-	];
+	]);
 }
 
-Tr.xyzw.toXY = [
+
+Tr.xyzw.toXY = transpose([
 		[1, 0, 0, 0],
 		[0, 1, 0, 0]
-];
+]);
 
 Tr.xyzw.toXYZ = [
 		[1, 0, 0, 0],
@@ -274,6 +305,12 @@ function polyMatrixToW(m) {
 	return transpose(transpose(m).map(r => [...r,1]));
 }
 
+
+function test() {
+
+
+}
+
 window.onload = function() {
 		canvas = document.getElementById("canvas"),
 		context = canvas.getContext("2d"),
@@ -287,6 +324,8 @@ window.onload = function() {
 	//orientation
 	context.transform(1,0,0,-1,width/2,height/2);
 	context.strokeStyle = 'rgba(255, 0, 0,0.5)';
+
+
 
 
 	setup = function() {
@@ -311,36 +350,39 @@ window.onload = function() {
 		plotAxes();
 		//testPlot();
 
+		//make these matrices arrays of COLUMN vectors,
+		//so each JS row is a COLUMN vector
+
 		wasPoly = [
 			[10,20],
 			[90,-10],
 			[30,40]
 		];
-		poly = transpose([
+		poly = [
 			[0,0],
 			[50,0],
 			[50,50],
 			[0,50]
-		]);
-		poly3D = transpose([
+		];
+		poly3D = [
 			[0,0,0], //bottom left
 			[50,0,0],//bottom right
 			[50,50,0], //top right
 			[0,50,0] //top left
-		]);
-		poly3DW = transpose([
-			[0,0,0,1],//BL
-			[50,0,0,1],//BR
+		];
+		poly3DW = [
+			[10,10,0,1],//BL
+			[50,10,0,1],//BR
 			[50,50,0,1],//TR
-			[0,50,0,1] //TL
-		]);
+			[10,50,0,1] //TL
+		];
 
 
-		linaz = transpose([
+		linaz = [
 			[130,80,0],
 			[-20,90,0],
 			[30,60,0]
-		]);
+		];
 
 		v345 = [[3,4,5]];
 		m345 = transpose(v345);
@@ -352,20 +394,22 @@ window.onload = function() {
 		m012345 = transpose(v012345);
 
 
+
+		/***
 		context.strokeStyle = getRandomColor();
 		context.beginPath();
 		plotPolyMatrix(poly);
 		context.stroke();
-
+		***/
 
 		context.strokeStyle = getRandomColor();
 		context.lineWidth = 1;
 		//context.beginPath();
 		plotPolyMatrix(
 				mmult(
-					poly,
 					Tr.xy.rotate(Math.random() * 2 * Math.PI),
-					Tr.xy.scale([2,2])
+					Tr.xy.scale([2,2]),
+					poly,
 				)
 		);
 		//context.stroke();
@@ -397,7 +441,7 @@ window.onload = function() {
 			Tr.xy.scale([0.2,2.5]),
 			Tr.xy.rotate(theta)
 		);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 
 		context.stroke();
 
@@ -407,7 +451,7 @@ window.onload = function() {
 		context.strokeStyle = 'rgba(0, 255, 127,0.5)';
 		context.beginPath();
 		T = mmult(shear,rotation);//,rotation);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 
 
@@ -415,26 +459,26 @@ window.onload = function() {
 		context.strokeStyle = 'rgba(0, 127, 255,0.5)';
 		context.beginPath();
 		T = mmult(rotation,shear);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 
 		//rotate then shear
 		context.strokeStyle = 'pink';
 		context.beginPath();
 		T = mmult(shear,rotation,shear);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 
 		context.strokeStyle = 'yellow';
 		context.beginPath();
 		T = mmult(shear,rotation,shear,rotation);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 
 		context.strokeStyle = 'black';
 		context.beginPath();
 		T = mmult(shear,rotation,shear,rotation,shear);
-		polyPlot(poly.map(v => mmult(v2m(v),T).flat()));
+		polyPlot(poly.map(v => mmult(T,v2m(v)).flat()));
 		context.stroke();
 	}
 
@@ -455,6 +499,33 @@ window.onload = function() {
 	}
 
 
+normalize = (val,min,max) => { return (val - min) / (max - min); }
+
+
+	function testMult() {
+
+		let a = [[2,4],[-1,-2]];
+		let b = [[3,1],[0,2]];
+		let c = [[1,2],[-2,-4]];
+
+		var rab = mmultAB(a,b);
+		if (rab.toString() !== [[5,10],[-2,-4]].toString()) { 
+			throw "OOPS AB"; 
+		}
+
+		var rba = mmultAB(b,a);
+		if (rba.toString() !== [[6,10],[-3,-5]].toString()) { 
+			throw "OOPS BA"; 
+		}
+
+		var rac = mmultAB(a,c);
+		if (rac.toString() !== [[0,0],[0,0]].toString()) { 
+			throw "OOPS AC"; 
+		}
+
+		console.log('PASSES TEST');
+	}
+
 
 
 	function testPlot() {
@@ -472,16 +543,16 @@ window.onload = function() {
 		da = .01;
 		a += da;
 		poly = mmult(
-			poly,
-			Tr.xy.rotate(da)					
+			Tr.xy.rotate(da),
+			poly
 		);
 
 
 		linaz = mmult(
-			linaz,
 			//Tr.xyz.rotateZ(da),					
 			Tr.xyz.rotateY(2*da),
-			Tr.xyz.rotateX(da)		
+			Tr.xyz.rotateX(da),
+			linaz,
 		);
 
 
@@ -498,41 +569,78 @@ window.onload = function() {
 		**/
 
 
-		poly3DW = mmult2(
-			poly3DW,
-			Tr.xyzw.rotateX(-2*da),
-			//poly3DW
-			//Tr.xyzw.rotateY(0.2*da),
-			//Tr.xyzw.rotateZ(0.5*da),
-			//////Tr.xyzw.translateXYZ([1,-1*a,0])
-		);
+		[xAng] = vlerp([xAng],[xAngGoal],0.5);//0.5);
+		xAngDiff = xAngGoal - xAng;
+		debug && console.log('xAngGoal,xAng,xAngDiff',xAngGoal,xAng,xAngDiff);
+
+		[yAng] = vlerp([yAng],[yAngGoal],0.5);
+		yAngDiff = yAngGoal - yAng;
+		debug && console.log('yAngGoal,yAng,yAngDiff',yAngGoal,yAng,yAngDiff);
 
 
-		let poly3DWXY = [
+
+
+		let poly3DWXY,saveXYZ,toOrigin;
+ 		poly3DWXY = [
 			poly3DW[0][0],
-			poly3DW[1][0]
+			poly3DW[0][1]
 		];
+		saveXYZ = [poly3DWXY[0],poly3DWXY[1],0];
+		toOrigin = vscale(saveXYZ,-1);
+
+
+		if (xAngDiff + yAngDiff !== 0) {
+			poly3DW = mmult(
+				//go to origin
+				Tr.xyzw.translateXYZ(toOrigin),
+				Tr.xyzw.rotate([-xAngDiff,yAngDiff,0]),
+				//return to save
+				Tr.xyzw.translateXYZ(saveXYZ),
+				poly3DW
+			);
+		}
+
+
 
 		lerped = vlerp(poly3DWXY,vGoal,0.33);
 		lerpDiff = vdiff(lerped,poly3DWXY);
+
+		/*
 		console.log('goal',vGoal);
 		console.log('poly',poly3DWXY);
 		console.log('lerped',lerped);
 		console.log('lerpDiff',lerpDiff);
-
+		*/
 		var lerpDiffXYZ = [...lerpDiff,0];
-		console.log('lerpDiffXYZ',lerpDiffXYZ);
+		debug && console.log('lerpDiffXYZ',lerpDiffXYZ);
 
 
+
+		/**
 		console.log('BEFORE');
 		console.table(poly3DW);
-		poly3DW = mmult2(
+		**/
+
+ 		poly3DWXY = [
+			poly3DW[0][0],
+			poly3DW[0][1]
+		];
+		saveXYZ = [poly3DWXY[0],poly3DWXY[1],0];
+		toOrigin = vscale(saveXYZ,-1);
+
+		poly3DW = mmult(
+			Tr.xyzw.translateXYZ(toOrigin),
+			Tr.xyzw.translateXYZ(lerpDiffXYZ),
+			Tr.xyzw.translateXYZ(saveXYZ),
 			poly3DW,
-			Tr.xyzw.translateXYZ(lerpDiffXYZ)
 		);
+		/**
 		console.log('AFTER');
 		console.table(poly3DW);
-		
+		**/
+
+
+
 		context.clearRect(0-width/2,0-height/2,width,height);
 
 		context.save();
@@ -541,15 +649,18 @@ window.onload = function() {
 		//plotPolyMatrix(poly);
 		plotPolyMatrix(
 			mmult(
-				transpose(transpose(linaz).map(r => [...r,1])),
-				Tr.xyzw.translateXYZ([0,-1,0]),
-				Tr.xyzw.toXY
+				//Tr.xyzw.translateXYZ([0,-1,0]),
+				Tr.xyzw.toXY,
+				linaz.map(r => [...r,1]),
 			)
 		);
+
+
+
 		plotPolyMatrix(
-			mmult2(
-				poly3DW,
-				Tr.xyzw.toXY
+			mmult(
+				Tr.xyzw.toXY,
+				poly3DW
 			)
 		);
 		context.stroke();
@@ -558,7 +669,7 @@ window.onload = function() {
 		if (!paused) {
 			setTimeout(function(){
 				requestAnimationFrame(render);
-			},1);
+			},10);
 		}
 		return false;//BAIL OUT EARLY
 	
@@ -571,14 +682,15 @@ window.onload = function() {
 		context.restore();
 		setTimeout(function() {
 			requestAnimationFrame(render);
-		},5);
+		},1500);
 	};//render
 
 
 	setup();
 	plotiHat();
 	plotjHat();
-	render();
+	testMult();
+	//render();
 
 
 
@@ -590,12 +702,19 @@ window.onload = function() {
 		vMouse = [event.clientX - width/2, height/2 - event.clientY];
 		vGoal = [...vMouse];
 		console.log('CLICK',vMouse,vGoal);
-		debug = true;
+		//debug = true;
 		//requestAnimationFrame(render);
 	});
+
 	document.body.addEventListener("mousemove", function(event) {
-		eventVec = [event.clientX, event.clientY];
+		//eventVec = [event.clientX, event.clientY];
 		vMouse = [event.clientX - width/2, height/2 - event.clientY];
+		[vX,vY] = vMouse;
+		var nX = Math.PI * (normalize(vX,leftCenter[0],rightCenter[0]) - 0.5);
+		var nY = Math.PI * (normalize(vY,-height/2,height/2) - 0.5);
+		///console.log(vX,'vmouse',nX);
+		yAngGoal = nX; //yes, flip the mouse motion with the axis of rotation
+		xAngGoal = nY;
 	});
 
 
