@@ -717,5 +717,6 @@ normalize = (val,min,max) => { return (val - min) / (max - min); }
 		xAngGoal = nY;
 	});
 
+	setTimeout(render,3000);
 
 };
