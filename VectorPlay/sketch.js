@@ -110,6 +110,7 @@ function funGraph (ctx,axes,func,color,thick) {
 	x0=center[0], 
 	y0=center[1], 
 	scale=axes.scale;
+	///scale = 1;
 
 	//var iMax = Math.round((ctx.canvas.width-x0)/dx);
 	var iMax = Math.round(
@@ -377,7 +378,7 @@ window.onload = function() {
 		axes.x0 = .5 + .5*canvas.width;  // x0 pixels from left to x=0
 		//axes.x0 = 0;
 		axes.y0 = .5 + .5*canvas.height; // y0 pixels from top to y=0
-		axes.scale = 40;                 // 40 pixels from x=0 to x=1
+		axes.scale = 50;                 // 40 pixels from x=0 to x=1
 		axes.doNegativeX = true;
 		//axes.doNegativeX = false;
 
@@ -745,7 +746,13 @@ normalize = (val,min,max) => { return (val - min) / (max - min); }
 	testMult();
 	//render();
 	let yEqualsX = (x) => x;
-	funGraph(ctx,axes,yEqualsX,getRandomColor(),2);
+	//let yFoo = (x) => x * x * x;
+	//let yFoo = (x) => x * x * x * x;
+	//let yFoo = (x) => Math.pow(x,1/Math.E)
+	let yFoo = (x) => Math.sin(x)
+	axes.doNegativeX = false;
+	axes.scale = 1;
+	funGraph(ctx,axes,yFoo,getRandomColor(),2);
 
 
 
