@@ -1,5 +1,6 @@
 var canvas,
 	context,
+	ctx,
 	width,
 	height,
 	arrowX,
@@ -96,6 +97,46 @@ function plotPolyMatrix(m) {
 		  [1, 0]
 		];
 
+
+
+ var axes = {
+
+
+ };
+
+function funGraph (ctx,axes,func,color,thick) {
+	var xx, yy, 
+	dx=4, 
+	x0=center[0], 
+	y0=center[1], 
+	scale=axes.scale;
+
+	//var iMax = Math.round((ctx.canvas.width-x0)/dx);
+	var iMax = Math.round(
+		vsub(rightCenter,leftCenter)[0] / dx
+	);
+	iMin = 0;
+	if (axes.doNegativeX) {
+		iMin = leftCenter[0] / dx;
+		//x0 = leftCenter[0];
+		//y0 = centerBottom[1];
+	}
+	//var iMin = axes.doNegativeX ? Math.round(-x0/dx) : 0;
+	ctx.beginPath();
+	ctx.lineWidth = thick;
+	ctx.strokeStyle = color;
+
+	for (var i=iMin;i<=iMax;i++) {
+		xx = dx*i; yy = scale*func(xx/scale);
+		if (i==iMin) {
+			ctx.moveTo(x0+xx,y0+yy);
+		}
+		else {
+	      ctx.lineTo(x0+xx,y0+yy);			
+		}   
+	}
+	ctx.stroke();
+}
 
 Tr = {
 	rotateMemo: function(theta) {
@@ -314,6 +355,7 @@ function test() {
 window.onload = function() {
 		canvas = document.getElementById("canvas"),
 		context = canvas.getContext("2d"),
+		ctx = context,
 		width = canvas.width = window.innerWidth,
 		height = canvas.height = window.innerHeight,
 		arrowX = width / 2,
@@ -330,12 +372,23 @@ window.onload = function() {
 
 	setup = function() {
 
+
+		//graphic calculator stuff.
+		axes.x0 = .5 + .5*canvas.width;  // x0 pixels from left to x=0
+		//axes.x0 = 0;
+		axes.y0 = .5 + .5*canvas.height; // y0 pixels from top to y=0
+		axes.scale = 40;                 // 40 pixels from x=0 to x=1
+		axes.doNegativeX = true;
+		//axes.doNegativeX = false;
+
+
+
 		leftCenter = vsub(center,[width/2,0]);
 		leftTop = vadd(center,[0,height/2]);
 		console.log(leftTop,'left top');
 		rightCenter = vadd(center,[width/2,0]);
-		centerTop = vsub(center,[0,width/2]);
-		centerBottom = vadd(center,[0,width/2]);
+		centerTop = vadd(center,[0,height/2]);
+		centerBottom = vsub(center,[0,height/2]);
 
 
 		vMouse = [0,0];
@@ -691,6 +744,8 @@ normalize = (val,min,max) => { return (val - min) / (max - min); }
 	plotjHat();
 	testMult();
 	//render();
+	let yEqualsX = (x) => x;
+	funGraph(ctx,axes,yEqualsX,getRandomColor(),2);
 
 
 
@@ -717,6 +772,6 @@ normalize = (val,min,max) => { return (val - min) / (max - min); }
 		xAngGoal = nY;
 	});
 
-	setTimeout(render,3000);
+	//setTimeout(render,3000);
 
 };
