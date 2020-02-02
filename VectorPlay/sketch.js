@@ -99,20 +99,20 @@ function plotPolyMatrix(m) {
 
 
 
- var axes = {
-
-
+ var defaultAxes = {
+		doNegativeX: true,
+		scale: [30,30]
  };
 
-function funGraph (ctx,axes,func,color,thick) {
+function funGraph (ctx,axesOpts,func,color,thick) {
 	var xx, yy, 
-	dx=4, 
-	x0=center[0], 
-	y0=center[1], 
-	scale=axes.scale;
-	///scale = 1;
+	dx = 4,
+	x0 = center[0], 
+	y0 = center[1];
 
-	//var iMax = Math.round((ctx.canvas.width-x0)/dx);
+	//combine defaults and opts
+	let axes = Object.assign({},defaultAxes,axesOpts); 
+	let [xScale,yScale] = axes.scale;
 	var iMax = Math.round(
 		vsub(rightCenter,leftCenter)[0] / dx
 	);
@@ -128,7 +128,8 @@ function funGraph (ctx,axes,func,color,thick) {
 	ctx.strokeStyle = color;
 
 	for (var i=iMin;i<=iMax;i++) {
-		xx = dx*i; yy = scale*func(xx/scale);
+		xx = dx*i;
+		yy = yScale * func(xx/xScale);
 		if (i==iMin) {
 			ctx.moveTo(x0+xx,y0+yy);
 		}
@@ -374,13 +375,6 @@ window.onload = function() {
 	setup = function() {
 
 
-		//graphic calculator stuff.
-		axes.x0 = .5 + .5*canvas.width;  // x0 pixels from left to x=0
-		//axes.x0 = 0;
-		axes.y0 = .5 + .5*canvas.height; // y0 pixels from top to y=0
-		axes.scale = 50;                 // 40 pixels from x=0 to x=1
-		axes.doNegativeX = true;
-		//axes.doNegativeX = false;
 
 
 
@@ -750,9 +744,13 @@ normalize = (val,min,max) => { return (val - min) / (max - min); }
 	//let yFoo = (x) => x * x * x * x;
 	//let yFoo = (x) => Math.pow(x,1/Math.E)
 	let yFoo = (x) => Math.sin(x)
-	axes.doNegativeX = false;
-	axes.scale = 1;
-	funGraph(ctx,axes,yFoo,getRandomColor(),2);
+
+	let axesOpts = {
+		//doNegativeX: true,
+		scale: [20,80]
+	}
+
+	funGraph(ctx,axesOpts,yFoo,getRandomColor(),2);
 
 
 
