@@ -4,6 +4,8 @@
 	<title>CM :: Vector Play</title>
 	<script type="text/javascript" src="la.js"></script>
 	<script type="text/javascript" src="sketch.js"></script>
+	<script type="text/javascript" src="scripts/require.js"></script>
+
 	<style type="text/css">
 	html, body {
 		margin: 0px;
@@ -16,5 +18,21 @@
 </head>
 <body>
 <canvas id="canvas"></canvas>
+<script>
+
+	requirejs.config({
+    baseUrl: 'scripts',
+    /**
+    paths: {
+        app: '../app'
+    }
+    **/
+});
+	require(['math/Matrix'],function(matrix){
+
+		console.log(matrix,'???');
+
+	});
+</script>
 </body>
 </html>
