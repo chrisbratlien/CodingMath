@@ -379,10 +379,10 @@ window.onload = function() {
 
 
 		leftCenter = vsub(center,[width/2,0]);
-		leftTop = vadd(center,[0,height/2]);
+		leftTop = vaddAB(center,[0,height/2]);
 		console.log(leftTop,'left top');
-		rightCenter = vadd(center,[width/2,0]);
-		centerTop = vadd(center,[0,height/2]);
+		rightCenter = vaddAB(center,[width/2,0]);
+		centerTop = vaddAB(center,[0,height/2]);
 		centerBottom = vsub(center,[0,height/2]);
 
 
@@ -457,7 +457,7 @@ window.onload = function() {
 				mmult(
 					Tr.xy.rotate(Math.random() * 2 * Math.PI),
 					Tr.xy.scale([2,2]),
-					poly,
+					transpose(poly), //poly is array of columns, so tranp
 				)
 		);
 		//context.stroke();
@@ -549,27 +549,81 @@ window.onload = function() {
 
 normalize = (val,min,max) => { return (val - min) / (max - min); }
 
+p = console.table;
+
+	function mAssert(m,mExpected) {
+		var sM = m.toString();
+		var sExpected = mExpected.toString();
+		if (sM === sExpected) { return true; }
+		p(sM);
+		p(sExpected);
+		throw("mAssert failed");
+	}
 
 	function testMult() {
 
-		let a = [[2,4],[-1,-2]];
-		let b = [[3,1],[0,2]];
-		let c = [[1,2],[-2,-4]];
+		var a = [[2,4],[-1,-2]],
+		b = [[3,1],[0,2]],
+		c = [[1,2],[-2,-4]];
 
-		var rab = mmultAB(a,b);
+		var rab = mmultABAsArraysOfColumnVectors(a,b);
 		if (rab.toString() !== [[5,10],[-2,-4]].toString()) { 
 			throw "OOPS AB"; 
 		}
 
-		var rba = mmultAB(b,a);
+		var rba = mmultABAsArraysOfColumnVectors(b,a);
 		if (rba.toString() !== [[6,10],[-3,-5]].toString()) { 
 			throw "OOPS BA"; 
 		}
 
-		var rac = mmultAB(a,c);
+		var rac = mmultABAsArraysOfColumnVectors(a,c);
 		if (rac.toString() !== [[0,0],[0,0]].toString()) { 
 			throw "OOPS AC"; 
 		}
+
+
+		a = [
+			[2],
+			[3],
+			[1]
+		];
+		var mToOrigin = [
+			[1, 0, -3],
+			[0, 1, -4],
+			[0, 0,  1]
+		];
+		var mRotate = [
+			[0, -1, 0],
+			[1,  0, 0],
+			[0,  0, 1]
+		];
+		var mReturn = [
+			[1, 0, 3],
+			[0, 1, 4],
+			[0, 0, 1]
+		];
+
+		mAssert(mmultABAsArraysOfRowVectors(mReturn,mRotate),[
+			[0, -1, 3],
+			[1,  0, 4],
+			[0,  0, 1]
+		]);
+
+
+		mAssert(
+			mmult(
+				mReturn,
+				mRotate,
+				mToOrigin,
+				a),[
+			[4],
+			[3],
+			[1]
+		]);
+
+
+mmultAB(mRotate,mToOrigin).toString()
+
 
 		console.log('PASSES TEST');
 	}
@@ -734,10 +788,10 @@ normalize = (val,min,max) => { return (val - min) / (max - min); }
 	};//render
 
 
+	testMult();
 	setup();
 	plotiHat();
 	plotjHat();
-	testMult();
 	//render();
 	let yEqualsX = (x) => x;
 	//let yFoo = (x) => x * x * x;

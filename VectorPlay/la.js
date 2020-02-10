@@ -1,11 +1,15 @@
 debug = false;
 vscale = (v,factor) => v.map(n => n * factor)
-vadd = (a,b) => a.map((asubi,i) => asubi + b[i]) // a-> + b-> 
-vdiff = (a,b) => vadd(a,vscale(b,-1));
+
+vaddAB = (a,b) => a.map((asubi,i) => asubi + b[i]) // a-> + b-> 
+vaddAll = (vs) => vs.reduce((accum,v) => vaddAB(accum,v))
+vadd = vaddAB;
+vdiff = (a,b) => vaddAB(a,vscale(b,-1));
 vsub = vdiff;
-vlerp = (a,b,factor) => vadd(a,vscale(vdiff(b,a),factor))
+vlerp = (a,b,factor) => vaddAB(a,vscale(vdiff(b,a),factor))
 vdot = (a,b) => a.reduce((accum,asubi,i) => accum + asubi * b[i],0)
 
+vaverage = (vs) => vscale(vadd(vs),1/vs.length);
 
 /**
 [[2,5,6],
@@ -39,20 +43,34 @@ transpose = (m) => {
   return res;
 }
 
-mmultAB = (A,B) => {
+mmultABAsArraysOfColumnVectors = (A,B) => {
   let AT = transpose(A);
   let res = B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
   return res;
 
+  /**
   let result = transpose(resT);
   return result;
-  /**
+  ***/
+}
+
+mmultABAsArraysOfRowVectors = (A,B) => {
   let BT = transpose(B);
   return A.map((Ar,Ari) => BT.map( (BTr,BTri) => vdot(BTr,Ar)));
+  /**
+  let AT = transpose(A);
+  let res = B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
+  return res;  
   **/
 }
+
+mmultAB = mmultABAsArraysOfRowVectors;
+
 //Ts as separate args
-mmult = (...Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
+mmultTA = (...Ts) => Ts.reduce( (accum,T) => mmultAB(T,accum));
+mmultAT = (...Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
+
+mmult = mmultAT;
 
 wasmmultAB2 = (A,B) => {
 
