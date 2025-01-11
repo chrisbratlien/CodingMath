@@ -1,10 +1,11 @@
-debug = false;
-vscale = (v,factor) => v.map(n => n * factor)
-vadd = (a,b) => a.map((asubi,i) => asubi + b[i]) // a-> + b-> 
-vdiff = (a,b) => vadd(a,vscale(b,-1));
-vsub = vdiff;
-vlerp = (a,b,factor) => vadd(a,vscale(vdiff(b,a),factor))
-vdot = (a,b) => a.reduce((accum,asubi,i) => accum + asubi * b[i],0)
+export const debug = false;
+
+export const vscale = (v,factor) => v.map(n => n * factor)
+export const vadd = (a,b) => a.map((asubi,i) => asubi + b[i]) // a-> + b-> 
+export const vdiff = (a,b) => vadd(a,vscale(b,-1));
+export const vsub = vdiff;
+export const vlerp = (a,b,factor) => vadd(a,vscale(vdiff(b,a),factor))
+export const vdot = (a,b) => a.reduce((accum,asubi,i) => accum + asubi * b[i],0)
 
 
 /**
@@ -25,7 +26,9 @@ mr = [1,3,4]
   c = 4, ri=1, cj=2
 **/
 
-transpose = (m) => {
+export const normalize = (val,min,max) => { return (val - min) / (max - min); }
+
+export const transpose = (m) => {
   //let res = new Array(m[0].length);
   let res = [];
   for (var i = 0; i < m[0].length; i += 1) {
@@ -39,7 +42,7 @@ transpose = (m) => {
   return res;
 }
 
-mmultAB = (A,B) => {
+export const mmultAB = (A,B) => {
   let AT = transpose(A);
   let res = B.map((Br,Bri) => AT.map( (ATr,ATri) => vdot(ATr,Br)));
   return res;
@@ -52,18 +55,18 @@ mmultAB = (A,B) => {
   **/
 }
 //Ts as separate args
-mmult = (...Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
+export const mmult = (...Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
 
-wasmmultAB2 = (A,B) => {
+export const wasmmultAB2 = (A,B) => {
 
   let result;
   if (debug) { 
-    debug = true;
+    //debug = true;
     console.log('mmultAB2::BEFORE::A');
     console.table(A);
     console.log('mmultAB2::BEFORE::B');
     console.table(B);
-    debug = true;
+    //debug = true;
   }
 
   let rowsA = transpose(A);
@@ -124,7 +127,7 @@ wasmmultAB2 = (A,B) => {
 
 ///let mmultAB = mmultAB2;
 
-mmult2 = (...Ts) => Ts.reduce( (accum,T) => mmultAB2(accum,T));
+export const mmult2 = (...Ts) => Ts.reduce( (accum,T) => mmultAB2(accum,T));
 
 
 /*
@@ -132,7 +135,7 @@ mmult2 = (...Ts) => Ts.reduce( (accum,T) => mmultAB2(accum,T));
 mmult = (Ts) => Ts.reduce( (accum,T) => mmultAB(accum,T));
 */
 
-v2m = (v) => v.map(vv => [vv]);
+export const v2m = (v) => v.map(vv => [vv]);
 
 
 //mmult(rotation,v2m([1,2])).flat())

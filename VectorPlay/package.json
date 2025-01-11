@@ -1,0 +1,25 @@
+{
+  "name": "webgl-examples",
+  "version": "0.0.1",
+  "description": "",
+  "dependencies": {
+    "@babel/preset-env": "^7.23.5",
+    "@types/jquery": "^3.5.32",
+    "source-map-loader": "^4.0.1",
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.2.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.17",
+    "@babel/core": "^7.12.17",
+    "babel-preset-env": "^1.7.0"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production webpack",
+    "watch": "NODE_ENV=development webpack --watch"
+  },
+  "author": "Chris Bratlien",
+  "license": "ISC"
+}
