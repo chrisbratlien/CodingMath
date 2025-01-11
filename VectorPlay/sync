@@ -1,0 +1,48 @@
+#!/bin/bash
+STAMP=$(date +%Y-%m-%d-%H%M%S)
+CWD=$(pwd)
+WHERE=$(basename $CWD)
+
+
+
+
+echo $STAMP $WHERE
+echo ========
+
+BRANCH=$(git branch --show-current)
+echo current branch: $BRANCH
+
+REMOTE=$(git config branch.$BRANCH.remote)
+
+echo current remote: $REMOTE
+
+gstatus=`git status --porcelain`
+
+if [ ${#gstatus} -ne 0 ]
+then
+
+    git add --all
+    git commit -m "$gstatus"
+fi
+git pull
+git push
+
+REPOS=~/.sync/repos
+
+REPO=$(git remote get-url --all $REMOTE)
+echo REPO is $REPO 
+
+if [ ! -d ~/.sync ]; then
+    echo MAKING DIR
+    mkdir ~/.sync
+fi
+if [ ! -f ~/.sync/repos ]; then
+    #mkdir -p ~/.sync
+    echo NO REPOS FILE
+    touch ~/.sync/repos
+fi
+
+
+TMP=/tmp/sync-repos-$RANDOM
+echo $REPO | cat - ~/.sync/repos | sort | uniq > $TMP
+mv $TMP ~/.sync/repos
